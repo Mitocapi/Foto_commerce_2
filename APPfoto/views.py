@@ -7,6 +7,7 @@ from django.urls import reverse_lazy, reverse
 from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib import messages
 # Create your views here.
 
 
@@ -89,13 +90,6 @@ class FotoListaRicercataView(FotoListView):
 
 
 
-class BreateFotoView(CreateView):
-    title = "Aggiungi la tua foto alla galleria"
-    form_class = CreateFotoForm
-    template_name = "APPfotoTempl/create_entry.html"
-    success_url = reverse_lazy("APPfoto:home")
-
-
 # views.py
 class CreateFotoView(LoginRequiredMixin, CreateView):
     model = Foto
@@ -113,23 +107,36 @@ def my_situation(request):
      user = get_object_or_404(User, pk=request.user.pk)
      return render(request, "APPfotoTempl/situation.html")
 
+
+
 @login_required
-class CreateAcquistoView(LoginRequiredMixin,CreateView):
-    template_name = 'APPfotoTempl/acquisto.html'  # Replace with your template path
-    success_url = 'your_success_url_name'  # Replace with your success URL name
+def CreaAcquisto(request, foto_id):
+    foto = Foto.objects.get(pk=foto_id)
 
-    def get(self, request, foto_id):
-        foto = get_object_or_404(Foto, pk=foto_id)
-        form = AcquistoForm(initial={'foto': foto})  # Initialize the form with the fixed Foto object
-        return render(request, self.template_name, {'foto': foto, 'form': form})
+    if request.method == "POST":
+        form = AcquistoForm(request.POST, initial={'foto': foto, 'acquirente': request.user})
 
-    def post(self, request, foto_id):
-        foto = get_object_or_404(Foto, pk=foto_id)
-        form = AcquistoForm(request.POST)
         if form.is_valid():
-            # Create an Acquisto object with the fixed Foto and other form data
             acquisto = form.save(commit=False)
-            acquisto.foto = foto  # Fix the Acquisto object's foto field to the received Foto object
+            acquisto.foto = foto
+            acquisto.acquirente = request.user
             acquisto.save()
-            return HttpResponseRedirect(reverse(self.success_url))  # Redirect to the success URL
-        return render(request, self.template_name, {'foto': foto, 'form': form})
+            return redirect('APPfoto:situation')
+        else:
+            messages.error(request, "Invalid form data. Please correct the errors.")
+    else:
+        initial_data = {'foto': foto, 'acquirente': request.user}
+        form = AcquistoForm(initial=initial_data)
+
+    # Make the acquirente field readonly and disabled
+    form.fields['acquirente'].widget.attrs['readonly'] = True
+    form.fields['acquirente'].widget.attrs['disabled'] = True
+
+    context = {
+        'foto': foto,
+        'form': form,
+    }
+
+    return render(request, 'APPfotoTempl/acquisto.html', context)
+
+

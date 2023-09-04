@@ -31,8 +31,9 @@ class Foto(models.Model):
 
 class Recensione(models.Model):
     foto = models.ForeignKey(Foto, on_delete=models.CASCADE, related_name="recensioni")
-    utente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="reviewer")
-    testo = models.CharField(max_length=250, default="Questo utente non ha lasciato una recensione scritta, solo un voto.")
+    utente = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recensioni_scritte")
+    testo = models.CharField(max_length=250, default="Questo utente non ha lasciato una recensione scritta, "
+                                                     "solo un voto.")
     voto_positivo = models.BooleanField()
     fotografo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fotografo", null=True, blank=True)
 
@@ -73,7 +74,7 @@ class Acquisto(models.Model):
         ("13 x 19", "13 x 19")
     ]
 
-    foto = models.ForeignKey(Foto, on_delete=models.CASCADE, related_name="Foto")
-    acquirente = models.ForeignKey(User,on_delete=models.CASCADE, related_name="acquirente")
+    foto = models.ForeignKey(Foto, on_delete=models.CASCADE, related_name="venduti")
+    acquirente = models.ForeignKey(User,on_delete=models.CASCADE, related_name="acquisti")
     materiale = models.CharField(max_length=100, choices=MATERIALE_DI_STAMPA)
     dimensioni = models.CharField(max_length=100, choices=DIMENSIONI)

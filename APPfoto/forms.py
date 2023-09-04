@@ -46,18 +46,26 @@ class CreateFotoForm(forms.ModelForm):
     helper.form_method = "POST"
     helper.add_input(Submit("submit", "Aggiungi Foto"))
 
+
     class Meta:
         model = Foto
-        fields = ["name", "artist", "main_colour", "landscape", "actual_photo"]
+        fields = ["name", "main_colour", "landscape", "actual_photo" ]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["artist"].widget.attrs["readonly"] = True
 
 
 class AcquistoForm(forms.ModelForm):
-    helper = FormHelper()
-    helper.form_id = "acquisto_crispy_form"
-    helper.form_method = "POST"
-    helper.add_input(Submit("submit", "Completa l'acquisto"))
-
     class Meta:
         model = Acquisto
-        fields = ["foto","acquirente","materiale","dimensioni"]
+        fields = ["foto", "acquirente", "materiale", "dimensioni"]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["acquirente"].disabled = True
+        self.fields["foto"].disabled = True
+        self.helper = FormHelper()
+        self.helper.form_id = "acquisto_crispy_form"
+        self.helper.form_method = "POST"
+        self.helper.add_input(Submit("submit", "Completa l'acquisto"))
