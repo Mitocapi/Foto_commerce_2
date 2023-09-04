@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 
-
-{% block title %} Home di {{user.username}} {% endblock %}
+{% block title %} Home di {{ user.username }} {% endblock %}
 
 {% block header1 %}
-  <h1>Home di {{user.username}} </h1>
+  <h1>Home di {{ user.username }} </h1>
   <p>Benvenuto
     {% if user.is_authenticated %}
      {{ user.username }}
@@ -18,29 +17,29 @@
 
 {% block content %}
 
-<h2>troverò il modo di salvare che acquisti hai fatto</h2>
+    <h2> Vediamo se ci azzecco, la sfera di cristallo dice che hai comprato: </h2>
 
-<p> Ulteriori dettagli </p>
+    <br>
 
-<br>
- QUI DEVO MOSTRARE LE FOTO CHE HAI COMPRATO, COME FACCIAMO? BOH
-<!-- { for c in listacopie %}
-<br>
-<div class="card">
-  <div class="card-header">
-     Copia con id {{ c.pk }}
-  </div>
-  <div class="card-body">
-    <h5 class="card-title">{ c.libro.titolo }}</h5>
-    <p class="card-text">Un libro di { c.libro.autore }} di ben { c.libro.pagine }} pagine...</p>
+    <!-- Iterate over Acquisto objects for the current user -->
+    {% for acquisto in user.acquisto_set.all %}
+      <div class="card">
+        <div class="card-header">
+           Acquisto con id {{ acquisto.pk }}
+        </div>
+        <div class="card-body">
+          <h5 class="card-title">{{ acquisto.foto.name }}</h5>
+          <p class="card-text">Una foto di {{ acquisto.foto.artist }} </p>
 
-    <a href="{ url 'gestione:restituzione' c.pk %}" class="btn btn-info"> Restituiscimi </a>
+          <!-- Add a link to manage the acquisto, replace 'your_url_name' with your actual URL name
+          <a href="{ url 'your_url_name' acquisto.pk %}" class="btn btn-info"> Gestisci Acquisto </a> -->
 
-  </div>
-</div>
-<br>
-{endfor%}   -->
+        </div>
+      </div>
+      <br>
+    {% endfor %}
 
-<br>
+    <br>
 
 {% endblock %}
+

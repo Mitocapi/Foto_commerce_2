@@ -50,3 +50,14 @@ class CreateFotoForm(forms.ModelForm):
         model = Foto
         fields = ["name", "artist", "main_colour", "landscape", "actual_photo"]
 
+
+class AcquistoForm(forms.ModelForm):
+    helper = FormHelper()
+    helper.form_id = "acquisto_crispy_form"
+    helper.form_method = "POST"
+    helper.add_input(Submit("submit", "Completa l'acquisto"))
+
+    class Meta:
+        model = Acquisto
+        fields = ["foto","acquirente","materiale","dimensioni"]
+

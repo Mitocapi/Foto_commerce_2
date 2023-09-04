@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import CreateAcquistoView
 
 app_name = "APPfoto"
 
@@ -10,6 +11,7 @@ urlpatterns = [
     path("crea_foto/", views.CreateFotoView.as_view(), name="creafoto"),
     path("lista_foto/",views.FotoListView.as_view(), name="listafoto"),
     path("search_wrong_colour/", views.SearchWrongColourView.as_view(), name="search_wrong_colour"),
-    path("situation/", views.my_situation, name="situation")
+    path("situation/", views.my_situation, name="situation"),
+    path("acquisto/<int:foto_id>/", CreateAcquistoView.as_view(), name="acquisto")
 
 ]
