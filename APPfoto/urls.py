@@ -11,6 +11,7 @@ urlpatterns = [
     path("lista_foto/",views.FotoListView.as_view(), name="listafoto"),
     path("search_wrong_colour/", views.SearchWrongColourView.as_view(), name="search_wrong_colour"),
     path("situation/", views.my_situation, name="situation"),
-    path("acquisto/<int:foto_id>/", views.CreaAcquisto, name="acquisto")
+    path("acquisto/<int:foto_id>/", views.CreaAcquisto, name="acquisto"),
+    path("fotografi_lista", views.FotografiListView.as_view(), name="listafotografi")
 
 ]

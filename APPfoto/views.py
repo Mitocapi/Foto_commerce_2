@@ -1,4 +1,4 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import *
 from django.views.generic.list import ListView
@@ -8,26 +8,47 @@ from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-# Create your views here.
+from .forms import SearchForm
+from django.shortcuts import render
+from django.views import View
+from django.db.models import Count, Exists, OuterRef, Q
 
 
 def home_view(request):
     return render(request, template_name="APPfotoTempl/home.html")
 
 
-from .forms import SearchForm  # Import your form class
 
-from django.shortcuts import render
-from django.views import View
+class FotografiListView(ListView):
+    template_name = 'APPfotoTempl/lista_fotografi.html'
+    context_object_name = 'members'
 
+    def get_queryset(self):
+        fotografi_group = Group.objects.get(name='Fotografi')
+        members = User.objects.filter(groups=fotografi_group).annotate(
+            positive_review_count=Count('recensioni', filter=Q(recensioni__voto_positivo=True))
+        )
 
+        # Check the 'sort' query parameter and apply sorting
+        sort_by = self.request.GET.get('sort')
+        if sort_by == 'positive_reviews':
+            members = members.order_by('-positive_review_count')
+        elif sort_by == 'alphabetical':
+            members = members.order_by('username')
+
+        return members
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['group_name'] = 'Fotografi'
+        return context
 
 
 class SearchWrongColourView(View):
     template_name = "APPfotoTempl/search_wrong_colour.html"
 
     def get(self, request, *args, **kwargs):
-        form = SearchForm()  # Replace with your actual form class
+        form = SearchForm()
         context = {'form': form}
         return render(request, self.template_name, context)
 
@@ -65,35 +86,40 @@ def search(request):
 
 class FotoListaRicercataView(FotoListView):
     titolo = "risultati ricerca"
-
     paginate_by = 10
 
     def get_queryset(self):
         sstring = self.kwargs['sstring']
         where = self.kwargs['where']
+        queryset = super().get_queryset()
 
+        # Sorting options
+        sort_by = self.request.GET.get('sort_by', None)
 
         if where == "name":
-            qq = self.model.objects.filter(name__icontains=sstring)
+            queryset = queryset.filter(name__icontains=sstring)
         elif where == "landscape":
-            # Filter using a boolean condition
-            qq = self.model.objects.filter(landscape=True)
+            queryset = queryset.filter(landscape=True)
         elif where == "main_colour":
-            # Filter using elements from a list
             COLOUR_CHOICES_to_filter = ["Black","Dark Blue","Green", "Gray", "Light Blue", "Orange", "Pink",
                                         "Purple", "Red", "White", "Yellow"]
-            qq = self.model.objects.filter(main_colour__in=sstring)
+            queryset = queryset.filter(main_colour__in=COLOUR_CHOICES_to_filter)
         else:
-            qq = self.model.objects.filter(artist__username__icontains=sstring)
+            queryset = queryset.filter(artist__username__icontains=sstring)
 
-        return qq
+        # Sort the queryset based on the sort_by parameter
+        if sort_by == 'price':
+            queryset = queryset.order_by('price')
+        elif sort_by == 'new':
+            queryset = queryset.order_by('-date_added')
 
+        return queryset
 
 
 # views.py
 class CreateFotoView(LoginRequiredMixin, CreateView):
     model = Foto
-    fields = ['name', 'main_colour', 'landscape', 'actual_photo']
+    fields = ['name', 'main_colour', 'landscape', 'price', 'actual_photo']
     template_name = 'APPfotoTempl/create_entry.html'
     success_url = reverse_lazy("APPfoto:home")
 

@@ -21,6 +21,7 @@ class Foto(models.Model):
     landscape = models.BooleanField()
     actual_photo = models.ImageField(upload_to='APPfoto/static')
     artist = models.ForeignKey(User, on_delete=models.CASCADE, default=0)
+    price = models.DecimalField(verbose_name="prezzo", max_digits=5, decimal_places=2, default=0.00)
 
     def __str__(self):
         if self.landscape:
@@ -35,7 +36,7 @@ class Recensione(models.Model):
     testo = models.CharField(max_length=250, default="Questo utente non ha lasciato una recensione scritta, "
                                                      "solo un voto.")
     voto_positivo = models.BooleanField()
-    fotografo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="fotografo", null=True, blank=True)
+    fotografo = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recensioni", null=True, blank=True)
 
     def scritta_da(self):
         return self.utente.username
